@@ -1,4 +1,4 @@
-/* Azeroth Chess V12: fixed homogeneous projection and centered cell-safe figures. */
+/* Azeroth Chess V13: distinctive fantasy silhouettes; cell-safe WebGL projection. */
 (()=>{'use strict';let yaw=0,gl,program,buffer,canvas,failed=false;const TAU=Math.PI*2;let verts=[];
 function tri(a,b,c,col){let u=b.map((v,i)=>v-a[i]),v=c.map((x,i)=>x-a[i]);let n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],len=Math.hypot(...n)||1;n=n.map(x=>x/len);for(let p of [a,b,c])verts.push(...p,...n,...col)}
 function quad(a,b,c,d,col){tri(a,b,c,col);tri(a,c,d,col)}
@@ -68,6 +68,47 @@ function hero(side,type,c,r){
    R(.50,.48,-.06,.50,2.13,-.06,.085,metal);B(.50,2.11,-.06,.19,.31,.08,metal);
    B(.50,1.40,-.06,.45,.075,.14,gold);R(-.27,.96,0,-.43,.49,0,.10,armor);
  }
+  // Large, readable silhouettes and front-facing emblems, visible at iPhone chess-square size.
+  // The negative Z direction faces the viewer in the default orientation.
+  if(type==='p'){
+    // Broad kite shield and a bright diagonal spearhead.
+    B(-.38,.58,-.34,.35,.48,.10,armor);B(-.38,.60,-.405,.10,.37,.018,gold);
+    B(-.38,.60,-.415,.27,.075,.018,metal);
+    R(.40,1.46,.02,.40,1.77,.02,.065,metal);
+  }else if(type==='r'){
+    // Castle silhouette: tall square corner towers and visible dark gate.
+    for(let x of [-.35,.35])for(let z of [-.35,.35]){
+      B(x,.92,z,.18,.54,.18,metal);B(x,1.43,z,.22,.19,.22,gold);
+    }
+    B(0,.36,-.47,.29,.43,.045,dark);B(0,.72,-.48,.33,.055,.045,gold);
+  }else if(type==='n'){
+    // Enlarged horse profile: projecting muzzle, pointed ears and contrasting mane.
+    B(0,1.00,-.64,.32,.24,.37,skin);B(0,.98,-.86,.31,.16,.17,metal);
+    for(let x of [-.16,.16])B(x,1.32,-.41,.10,.28,.10,gold);
+    for(let j=0;j<4;j++)B(0,1.04-j*.12,-.14+j*.08,.13,.12,.13,dark);
+    B(0,.80,.08,.35,.13,.37,gold);
+  }else if(type==='b'){
+    // Mage: wide hat brim, pointed hood, unmistakable glowing orb and robe.
+    C(0,1.45,0,.39,.39,.08,gold,12);
+    C(0,1.54,0,.29,0,.54,cloth,12);
+    S(.46,2.03,-.06,.20,magic);S(.46,2.03,-.19,.075,metal);
+    B(0,.68,-.37,.30,.37,.045,gold);
+  }else if(type==='q'){
+    // Queen: wide jeweled crown, distinctive royal shoulder wings and orb.
+    for(let x of [-.40,.40]){
+      R(x*.48,1.03,0,x,1.52,0,.10,gold);
+      S(x,1.53,0,.095,magic);
+    }
+    S(0,1.96,0,.14,magic);
+    B(0,.75,-.37,.33,.32,.05,gold);
+  }else if(type==='k'){
+    // King: taller angular crown and a broad sword crossguard.
+    for(let x of [-.27,0,.27])B(x,1.75,-.12,.13,.39,.13,gold);
+    S(0,2.18,-.12,.12,magic);
+    B(.50,1.52,-.10,.53,.11,.17,gold);
+    B(.50,1.84,-.10,.13,.55,.10,metal);
+    B(0,.91,-.39,.36,.38,.05,gold);
+  }
  // Faction-specific unmistakable crests: Alliance wings, Horde forward horns.
  if(alliance){
    B(-.22,.31,.20,.16,.35,.12,gold);B(.22,.31,.20,.16,.35,.12,gold);
@@ -75,10 +116,10 @@ function hero(side,type,c,r){
    R(-.23,.31,.20,-.39,.63,.26,.065,metal);R(.23,.31,.20,.39,.63,.26,.065,metal);
  }
  let out=verts;verts=old;let co=Math.cos(yaw),si=Math.sin(yaw);
- for(let i=0;i<out.length;i+=9){let x=out[i],z=out[i+2],nx=out[i+3],nz=out[i+5];verts.push((x*co-z*si)*0.68+c-3.5,out[i+1],(x*si+z*co)*0.49+r-3.5,nx*co-nz*si,out[i+4],nx*si+nz*co,...out.slice(i+6,i+9))}
+ for(let i=0;i<out.length;i+=9){let x=out[i],z=out[i+2],nx=out[i+3],nz=out[i+5];verts.push((x*co-z*si)*0.68+c-3.5,out[i+1],(x*si+z*co)*0.42+r-3.5,nx*co-nz*si,out[i+4],nx*si+nz*co,...out.slice(i+6,i+9))}
 }
 
 function shader(type,src){let s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
-function init(board){if(gl||failed)return;try{canvas=document.createElement('canvas');canvas.id='webgl-figures';canvas.setAttribute('aria-hidden','true');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3';board.style.position='relative';board.append(canvas);gl=canvas.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:false});if(!gl)throw Error('WebGL non disponible');let vs=shader(gl.VERTEX_SHADER,'attribute vec3 aPos;attribute vec3 aNormal;attribute vec3 aColor;varying vec3 vColor;varying vec3 vNormal;void main(){gl_Position=vec4(aPos.x/4.0,(-aPos.z+(aPos.y-1.10)*0.25)/4.0,(-aPos.z*0.06-aPos.y*0.10),1.0);vColor=aColor;vNormal=aNormal;}'),fs=shader(gl.FRAGMENT_SHADER,'precision mediump float;varying vec3 vColor;varying vec3 vNormal;void main(){vec3 n=normalize(vNormal);float light=0.48+0.52*abs(dot(n,normalize(vec3(-0.5,0.9,0.7))));gl_FragColor=vec4(vColor*light,1.0);}');program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));buffer=gl.createBuffer();gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL)}catch(e){failed=true;console.error('Azeroth WebGL:',e);if(canvas)canvas.remove();gl=null}}
+function init(board){if(gl||failed)return;try{canvas=document.createElement('canvas');canvas.id='webgl-figures';canvas.setAttribute('aria-hidden','true');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3';board.style.position='relative';board.append(canvas);gl=canvas.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:false});if(!gl)throw Error('WebGL non disponible');let vs=shader(gl.VERTEX_SHADER,'attribute vec3 aPos;attribute vec3 aNormal;attribute vec3 aColor;varying vec3 vColor;varying vec3 vNormal;void main(){gl_Position=vec4(aPos.x/4.0,(-aPos.z+(aPos.y-1.10)*0.18)/4.0,(-aPos.z*0.06-aPos.y*0.10),1.0);vColor=aColor;vNormal=aNormal;}'),fs=shader(gl.FRAGMENT_SHADER,'precision mediump float;varying vec3 vColor;varying vec3 vNormal;void main(){vec3 n=normalize(vNormal);float light=0.48+0.52*abs(dot(n,normalize(vec3(-0.5,0.9,0.7))));gl_FragColor=vec4(vColor*light,1.0);}');program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));buffer=gl.createBuffer();gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL)}catch(e){failed=true;console.error('Azeroth WebGL:',e);if(canvas)canvas.remove();gl=null}}
 function draw(board,pieces){init(board);if(!gl)return false;if(canvas.parentElement!==board)board.append(canvas);let dpr=Math.min(devicePixelRatio||1,2),size=Math.round(board.clientWidth*dpr);if(!size)return false;if(canvas.width!==size||canvas.height!==size){canvas.width=canvas.height=size;gl.viewport(0,0,size,size)}verts=[];for(let p of pieces)hero(p.side,p.type,p.c,p.r);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.DYNAMIC_DRAW);for(let [name,offset] of [['aPos',0],['aNormal',3],['aColor',6]]){let loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,3,gl.FLOAT,false,36,offset*4)}gl.drawArrays(gl.TRIANGLES,0,verts.length/9);return true}
 window.Azeroth3D={draw,rotate(){yaw+=Math.PI/4},available:true};})();
