@@ -1,7 +1,13 @@
-AZEROTH CHESS V2
+AZEROTH CHESS V3 — INSTALLATION IPHONE
 
-Sur iPhone : remplacer les fichiers du dépôt GitHub Pages par ceux de ce ZIP, en conservant index.html à la racine. Ajouter les nouveaux fichiers app.js et icon.png. Après publication, ouvrir le site dans Safari et actualiser. Si l'ancienne version persiste, fermer puis rouvrir l'app installée ou supprimer l'icône et la réajouter.
+1. Décompressez ce ZIP dans Fichiers.
+2. Dans votre dépôt GitHub Pages existant, choisissez Ajouter un fichier > Téléverser des fichiers.
+3. Sélectionnez les six fichiers de ce dossier (pas le ZIP), puis validez les modifications dans main.
+4. Attendez quelques minutes. Ouvrez votre adresse GitHub Pages dans Safari et actualisez.
+5. Si vous voyez encore l'ancienne version, essayez ?v=3 à la fin de l'URL et relancez l'application depuis l'écran d'accueil.
 
-V2 : règles légales (échec, mat, pat, roque, prise en passant, promotion), IA locale simple à deux niveaux, historique, annulation, sauvegarde locale, interface responsive.
+NOUVEAUTÉS : écran d'accueil immersif, thème Alliance/Horde retravaillé, plateau avec éclairages et pièces stylisées, animations discrètes, nouvelle icône.
 
-Limites : pas de vrais modèles 3D ni de sons; IA de démonstration; pas de détection de triple répétition ou matériel insuffisant. Personnages nommés à titre illustratif; pas d'assets officiels.
+RÈGLES : base V2 conservée (roque, promotion, prise en passant, échec et mat, pat), IA locale simple, sauvegarde automatique.
+
+LIMITES : pas de héros 3D, de sons ou d'illustrations officielles. IA de démonstration. Pas de détection de triple répétition ou de matériel insuffisant. La V3 utilise la même sauvegarde locale que la V2 sur la même adresse et le même navigateur, mais une perte des données du navigateur peut supprimer les parties.
