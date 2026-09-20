@@ -1,13 +1,7 @@
-AZEROTH CHESS V3 — INSTALLATION IPHONE
+AZEROTH CHESS V4 — PERSONNAGES
 
-1. Décompressez ce ZIP dans Fichiers.
-2. Dans votre dépôt GitHub Pages existant, choisissez Ajouter un fichier > Téléverser des fichiers.
-3. Sélectionnez les six fichiers de ce dossier (pas le ZIP), puis validez les modifications dans main.
-4. Attendez quelques minutes. Ouvrez votre adresse GitHub Pages dans Safari et actualisez.
-5. Si vous voyez encore l'ancienne version, essayez ?v=3 à la fin de l'URL et relancez l'application depuis l'écran d'accueil.
+Cette version remplace les symboles classiques des 12 types de pièces par des portraits fantastiques originaux (6 rôles x 2 factions), directement intégrés à app.js : aucun fichier image supplémentaire à envoyer. Les règles et sauvegardes V3 sont conservées.
 
-NOUVEAUTÉS : écran d'accueil immersif, thème Alliance/Horde retravaillé, plateau avec éclairages et pièces stylisées, animations discrètes, nouvelle icône.
+Sur iPhone : décompresser le ZIP, sélectionner les 6 fichiers à la racine du dossier, les téléverser dans le dépôt GitHub existant et valider. Ouvrir ensuite index.html?v=4 dans Safari. Si l’icône conserve l’ancienne version, fermer puis rouvrir l’app et attendre la mise à jour du service worker.
 
-RÈGLES : base V2 conservée (roque, promotion, prise en passant, échec et mat, pat), IA locale simple, sauvegarde automatique.
-
-LIMITES : pas de héros 3D, de sons ou d'illustrations officielles. IA de démonstration. Pas de détection de triple répétition ou de matériel insuffisant. La V3 utilise la même sauvegarde locale que la V2 sur la même adresse et le même navigateur, mais une perte des données du navigateur peut supprimer les parties.
+Les personnages sont des illustrations vectorielles 2D, pas des modèles 3D ni des portraits officiels de Warcraft.
