@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#070a12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Azeroth Chess">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Azeroth Chess — Alliance vs Horde</title>
+<style>
+:root{--bg:#070a12;--panel:#0d1220;--panel2:#121a2b;--gold:#d7b56d;--blue:#55a7ff;--red:#e36b67;--text:#f4f2ea;--muted:#9da8bd;--light:#e6d5b7;--dark:#76583f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:radial-gradient(circle at 50% 0,#18243c 0,#070a12 48%,#04060b 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;min-height:100%;overflow-x:hidden}
+body{padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)}
+button{font:inherit;color:inherit;border:0}
+.app{max-width:900px;margin:auto;min-height:100vh}
+header{padding:20px 4px 10px;text-align:center}
+.logo{font-size:12px;letter-spacing:.28em;color:var(--gold);text-transform:uppercase}
+h1{font-size:clamp(30px,8vw,52px);margin:6px 0 2px;letter-spacing:.03em}
+.subtitle{color:var(--muted);font-size:13px}
+.hero{margin:12px 0 16px;padding:16px;border:1px solid #28334a;border-radius:24px;background:linear-gradient(145deg,#10192a,#090d17);box-shadow:0 20px 50px #0008}
+.factions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.faction{padding:15px;border-radius:18px;background:#ffffff06;border:1px solid #ffffff10}
+.faction b{display:block;font-size:15px}.faction span{font-size:12px;color:var(--muted)}
+.alliance b{color:var(--blue)}.horde b{color:var(--red)}
+.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.btn{padding:12px 10px;border-radius:14px;background:linear-gradient(180deg,#1b2740,#101727);border:1px solid #2b3953;font-weight:700;font-size:13px}
+.btn.primary{background:linear-gradient(180deg,#b9924f,#76562b);color:#100d08;border-color:#d7b56d}
+.btn:active{transform:scale(.98)}
+.game{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.boardwrap{position:relative;background:#090d15;border:1px solid #303b50;padding:8px;border-radius:24px;box-shadow:0 24px 70px #000b}
+.board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;border-radius:15px;overflow:hidden;border:2px solid #9a7848;touch-action:manipulation}
+.sq{position:relative;display:flex;align-items:center;justify-content:center;font-size:clamp(29px,9.5vw,72px);line-height:1;cursor:pointer}
+.sq.light{background:var(--light)}.sq.dark{background:var(--dark)}
+.sq.sel{outline:4px solid #ffe28a;outline-offset:-4px;z-index:2}
+.sq.move:after{content:"";width:22%;height:22%;border-radius:50%;background:#ffffff80;position:absolute}
+.sq.capture:after{content:"";position:absolute;inset:7%;border:4px solid #ffe28a;border-radius:18%}
+.piece{filter:drop-shadow(0 5px 3px #0009);position:relative;z-index:1}
+.whitepiece{color:#eaf4ff;text-shadow:0 0 8px #3f9dff,0 3px 2px #000}
+.blackpiece{color:#ffd9cf;text-shadow:0 0 8px #e44f42,0 3px 2px #000}
+.coord{position:absolute;font-size:8px;font-weight:800;opacity:.65}.file{bottom:3px;right:4px}.rank{top:3px;left:4px}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:linear-gradient(145deg,#11192a,#0b101b);border:1px solid #273249;border-radius:18px;padding:13px}
+.card h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.status{font-weight:800}.history{max-height:150px;overflow:auto;font-size:12px;color:#c8d0df;line-height:1.65}
+.footer{text-align:center;color:#66728a;font-size:10px;padding:20px}
+.overlay{position:fixed;inset:0;background:#03050bd9;backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+.modal{max-width:480px;width:100%;background:linear-gradient(145deg,#131d30,#080c15);border:1px solid #33415c;border-radius:26px;padding:24px;box-shadow:0 30px 100px #000}
+.modal h2{margin-top:0}.modal p{color:#aeb8ca;line-height:1.5;font-size:14px}
+.hidden{display:none!important}
+@media(min-width:760px){.game{grid-template-columns:minmax(480px,1fr) 280px}.info{grid-template-columns:1fr}.controls{grid-template-columns:repeat(5,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="logo">Azeroth Chess</div><h1>ALLIANCE ⚔ HORDE</h1><div class="subtitle">Édition personnelle • expérience fantasy sur iPhone</div></header>
+
+<section class="hero">
+  <div class="factions">
+    <div class="faction alliance"><b>✦ ALLIANCE</b><span>Anduin • Jaina • Uther • Tyrande • Arthas • Lothar</span></div>
+    <div class="faction horde"><b>✹ HORDE</b><span>Thrall • Sylvanas • Garrosh • Vol'jin • Rexxar • Saurfang</span></div>
+  </div>
+</section>
+
+<div class="controls">
+<button class="btn primary" id="new">Nouvelle partie</button>
+<button class="btn" id="mode">Mode : 2 joueurs</button>
+<button class="btn" id="undo">Annuler</button>
+<button class="btn" id="save">Sauvegarder</button>
+<button class="btn" id="help">Guide</button>
+</div>
+
+<div class="game">
+  <div class="boardwrap"><div id="board" class="board"></div></div>
+  <aside class="info">
+    <div class="card"><h3>Partie</h3><div id="status" class="status">Tour de l'Alliance</div><div id="detail" style="color:#8995aa;font-size:11px;margin-top:5px">Touchez une pièce puis sa destination.</div></div>
+    <div class="card"><h3>Chronique</h3><div id="history" class="history">Aucun coup.</div></div>
+    <div class="card"><h3>Héros</h3><div style="font-size:12px;color:#aeb8ca;line-height:1.7">♔ Anduin / Thrall<br>♕ Jaina / Sylvanas<br>♖ Uther / Garrosh<br>♗ Tyrande / Vol'jin<br>♘ Arthas / Rexxar<br>♙ Lothar / Saurfang</div></div>
+  </aside>
+</div>
+<div class="footer">Prototype premium personnel • aucun contenu officiel intégré</div>
+</div>
+
+<div id="modal" class="overlay hidden"><div class="modal"><h2>Bienvenue dans Azeroth Chess</h2>
+<p>Une version installable sur iPhone via Safari. Le plateau est tactile, les parties sont sauvegardées localement et le mode IA propose une première expérience solo.</p>
+<p><b>Installation :</b> ouvrez cette page dans Safari → Partager → Ajouter à l’écran d’accueil.</p>
+<button class="btn primary" id="close" style="width:100%;margin-top:8px">Commencer</button></div></div>
+
+<script>
+const heroes={w:{k:"Anduin",q:"Jaina",r:"Uther",b:"Tyrande",n:"Arthas",p:"Lothar"},b:{k:"Thrall",q:"Sylvanas",r:"Garrosh",b:"Vol'jin",n:"Rexxar",p:"Saurfang"}};
+const glyph={k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"};
+let board=[],turn="w",selected=null,history=[],vsAI=false,gameOver=false;
+const $=id=>document.getElementById(id);
+function initial(){board=[
+["br","bn","bb","bq","bk","bb","bn","br"],["bp","bp","bp","bp","bp","bp","bp","bp"],
+[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],
+[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],
+["wp","wp","wp","wp","wp","wp","wp","wp"],["wr","wn","wb","wq","wk","wb","wn","wr"]];}
+function color(p){return p?.[0]} function type(p){return p?.[1]}
+function inside(r,c){return r>=0&&r<8&&c>=0&&c<8}
+function pseudo(r,c,nr,nc,p){
+ let dr=nr-r,dc=nc-c,t=type(p),col=color(p);
+ if(!inside(nr,nc))return false;
+ if(board[nr][nc]?.[0]===col)return false;
+ if(t==="p"){let d=col==="w"?-1:1;let start=col==="w"?6:1;
+  if(dc===0&&!board[nr][nc]&&(dr===d||(r===start&&dr===2*d&&!board[r+d][c])))return true;
+  return Math.abs(dc)===1&&dr===d&&!!board[nr][nc];
+ }
+ if(t==="n")return (Math.abs(dr)===2&&Math.abs(dc)===1)||(Math.abs(dr)===1&&Math.abs(dc)===2);
+ if(t==="k")return Math.max(Math.abs(dr),Math.abs(dc))===1;
+ if((t==="r"||t==="q")&&(dr===0||dc===0) || (t==="b"||t==="q")&&Math.abs(dr)===Math.abs(dc)){
+  let sr=Math.sign(dr),sc=Math.sign(dc),rr=r+sr,cc=c+sc;
+  while(rr!==nr||cc!==nc){if(board[rr][cc])return false;rr+=sr;cc+=sc}return true;
+ } return false;
+}
+function legalMoves(r,c){let p=board[r][c],out=[];if(!p||color(p)!==turn)return out;
+ for(let nr=0;nr<8;nr++)for(let nc=0;nc<8;nc++)if(pseudo(r,c,nr,nc,p))out.push([nr,nc]);return out}
+function move(a,b){
+ let p=board[a[0]][a[1]], captured=board[b[0]][b[1]];
+ board[b[0]][b[1]]=p;board[a[0]][a[1]]=null;
+ if(type(p)==="p"&&(b[0]===0||b[0]===7))board[b[0]][b[1]]=color(p)+"q";
+ history.push({a,b,p,captured});
+ turn=turn==="w"?"b":"w";selected=null;
+ if(captured&&type(captured)==="k")gameOver=true;
+ saveLocal();render();
+ if(vsAI&&turn==="b"&&!gameOver)setTimeout(aiMove,300);
+}
+function aiMove(){let moves=[];for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(board[r][c]?.[0]==="b")for(const m of legalFor("b",r,c))moves.push([[r,c],m]);
+ if(!moves.length){gameOver=true;render();return}
+ let captures=moves.filter(x=>board[x[1][0]][x[1][1]]);let pick=(captures.length?captures:moves)[Math.floor(Math.random()*(captures.length?captures.length:moves.length))];move(pick[0],pick[1]);
+}
+function legalFor(col,r,c){let old=turn;turn=col;let m=legalMoves(r,c);turn=old;return m}
+function render(){
+ const el=$("board");el.innerHTML="";
+ for(let r=0;r<8;r++)for(let c=0;c<8;c++){let s=document.createElement("div");s.className="sq "+((r+c)%2?"dark":"light");
+  let p=board[r][c];if(selected&&selected[0]===r&&selected[1]===c)s.classList.add("sel");
+  if(selected&&legalMoves(selected[0],selected[1]).some(m=>m[0]===r&&m[1]===c))s.classList.add(board[r][c]?"capture":"move");
+  if(p){let sp=document.createElement("span");sp.className="piece "+(p[0]==="w"?"whitepiece":"blackpiece");sp.textContent=glyph[p[1]];sp.title=heroes[p[0]][p[1]];s.appendChild(sp)}
+  if(c===0){let z=document.createElement("span");z.className="coord rank";z.textContent=8-r;s.appendChild(z)}
+  if(r===7){let z=document.createElement("span");z.className="coord file";z.textContent="abcdefgh"[c];s.appendChild(z)}
+  s.onclick=()=>tap(r,c);el.appendChild(s);
+ }
+ $("status").textContent=gameOver?"Partie terminée":(turn==="w"?"Tour de l'Alliance":"Tour de la Horde");
+ $("detail").textContent=gameOver?"Le roi adverse a été capturé dans cette version simplifiée.":"Touchez une pièce puis sa destination.";
+ $("history").innerHTML=history.length?history.map((h,i)=>`${i+1}. ${heroes[h.p[0]][h.p[1]]} ${String.fromCharCode(97+h.a[1])}${8-h.a[0]} → ${String.fromCharCode(97+h.b[1])}${8-h.b[0]}`).join("<br>"):"Aucun coup.";
+}
+function tap(r,c){if(gameOver||(vsAI&&turn==="b"))return;let p=board[r][c];
+ if(selected){let ms=legalMoves(selected[0],selected[1]);if(ms.some(m=>m[0]===r&&m[1]===c)){move(selected,[r,c]);return}selected=null}
+ if(p&&p[0]===turn)selected=[r,c];render();}
+function saveLocal(){localStorage.setItem("azchess",JSON.stringify({board,turn,history,vsAI,gameOver}))}
+function load(){try{let x=JSON.parse(localStorage.getItem("azchess"));if(x){board=x.board;turn=x.turn;history=x.history||[];vsAI=!!x.vsAI;gameOver=!!x.gameOver;return true}}catch(e){}return false}
+$("new").onclick=()=>{initial();turn="w";selected=null;history=[];gameOver=false;saveLocal();render()}
+$("mode").onclick=()=>{vsAI=!vsAI;$("mode").textContent=vsAI?"Mode : IA Horde":"Mode : 2 joueurs";initial();turn="w";selected=null;history=[];gameOver=false;saveLocal();render()}
+$("undo").onclick=()=>{let h=history.pop();if(!h)return;board[h.a[0]][h.a[1]]=h.p;board[h.b[0]][h.b[1]]=h.captured;turn=h.p[0];gameOver=false;if(vsAI&&history.length){let h2=history.pop();if(h2){board[h2.a[0]][h2.a[1]]=h2.p;board[h2.b[0]][h2.b[1]]=h2.captured;turn=h2.p[0]}}saveLocal();render()}
+$("save").onclick=()=>{saveLocal();$("detail").textContent="Partie sauvegardée sur cet iPhone."}
+$("help").onclick=()=>$("modal").classList.remove("hidden");$("close").onclick=()=>$("modal").classList.add("hidden");
+if(!load())initial();$("mode").textContent=vsAI?"Mode : IA Horde":"Mode : 2 joueurs";render();
+</script>
+</body></html>
