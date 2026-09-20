@@ -1,21 +1,7 @@
-AZEROTH CHESS — ÉDITION PREMIUM PERSONNELLE
+AZEROTH CHESS V2
 
-Installation sur iPhone sans Mac:
-1. Placez ces fichiers sur un hébergement web statique.
-2. Ouvrez index.html via une URL HTTPS dans Safari.
-3. Safari > Partager > Ajouter à l’écran d’accueil.
-4. Lancez l’icône « Azeroth Chess ».
+Sur iPhone : remplacer les fichiers du dépôt GitHub Pages par ceux de ce ZIP, en conservant index.html à la racine. Ajouter les nouveaux fichiers app.js et icon.png. Après publication, ouvrir le site dans Safari et actualiser. Si l'ancienne version persiste, fermer puis rouvrir l'app installée ou supprimer l'icône et la réajouter.
 
-Cette version est une PWA/web app personnelle. Elle ne nécessite pas Xcode.
+V2 : règles légales (échec, mat, pat, roque, prise en passant, promotion), IA locale simple à deux niveaux, historique, annulation, sauvegarde locale, interface responsive.
 
-Fonctions:
-- plateau tactile responsive
-- mode 2 joueurs
-- mode IA simple
-- historique et annulation
-- sauvegarde locale
-- interface fantasy
-- mode hors connexion après premier chargement
-- mapping de héros illustratif
-
-Note: les noms/personnages Warcraft sont utilisés ici comme thème de prototype personnel. Aucun asset officiel n’est inclus.
+Limites : pas de vrais modèles 3D ni de sons; IA de démonstration; pas de détection de triple répétition ou matériel insuffisant. Personnages nommés à titre illustratif; pas d'assets officiels.
