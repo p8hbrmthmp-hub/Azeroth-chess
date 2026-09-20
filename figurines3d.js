@@ -1,4 +1,4 @@
-/* Azeroth Chess V13: distinctive fantasy silhouettes; cell-safe WebGL projection. */
+/* Azeroth Chess V14: larger automatically fitted 3D silhouettes per square. */
 (()=>{'use strict';let yaw=0,gl,program,buffer,canvas,failed=false;const TAU=Math.PI*2;let verts=[];
 function tri(a,b,c,col){let u=b.map((v,i)=>v-a[i]),v=c.map((x,i)=>x-a[i]);let n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],len=Math.hypot(...n)||1;n=n.map(x=>x/len);for(let p of [a,b,c])verts.push(...p,...n,...col)}
 function quad(a,b,c,d,col){tri(a,b,c,col);tri(a,c,d,col)}
@@ -115,11 +115,27 @@ function hero(side,type,c,r){
  }else{
    R(-.23,.31,.20,-.39,.63,.26,.065,metal);R(.23,.31,.20,.39,.63,.26,.065,metal);
  }
- let out=verts;verts=old;let co=Math.cos(yaw),si=Math.sin(yaw);
- for(let i=0;i<out.length;i+=9){let x=out[i],z=out[i+2],nx=out[i+3],nz=out[i+5];verts.push((x*co-z*si)*0.68+c-3.5,out[i+1],(x*si+z*co)*0.42+r-3.5,nx*co-nz*si,out[i+4],nx*si+nz*co,...out.slice(i+6,i+9))}
+  // Fit each complete silhouette, including weapons and crowns, into its own square.
+  // This avoids clipping at board edges while maximizing its visible size.
+  let out=verts;verts=old;let co=Math.cos(yaw),si=Math.sin(yaw);
+  let transformed=[],minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(let i=0;i<out.length;i+=9){
+    let x=out[i],z=out[i+2],nx=out[i+3],nz=out[i+5];
+    let rx=x*co-z*si,rz=x*si+z*co;
+    let px=rx*.78,py=-rz*.34+(out[i+1]-1.05)*.36;
+    transformed.push([px,py,out[i+1],nx*co-nz*si,out[i+4],nx*si+nz*co,...out.slice(i+6,i+9)]);
+    minX=Math.min(minX,px);maxX=Math.max(maxX,px);
+    minY=Math.min(minY,py);maxY=Math.max(maxY,py);
+  }
+  let scale=Math.min(.88/(maxX-minX||1),.88/(maxY-minY||1));
+  let midX=(minX+maxX)/2,midY=(minY+maxY)/2;
+  for(let v of transformed){
+    // z stores the inverted vertical screen coordinate; y is used for depth.
+    verts.push(c-3.5+(v[0]-midX)*scale,v[2],r-3.5-(v[1]-midY)*scale,...v.slice(3));
+  }
 }
 
 function shader(type,src){let s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
-function init(board){if(gl||failed)return;try{canvas=document.createElement('canvas');canvas.id='webgl-figures';canvas.setAttribute('aria-hidden','true');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3';board.style.position='relative';board.append(canvas);gl=canvas.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:false});if(!gl)throw Error('WebGL non disponible');let vs=shader(gl.VERTEX_SHADER,'attribute vec3 aPos;attribute vec3 aNormal;attribute vec3 aColor;varying vec3 vColor;varying vec3 vNormal;void main(){gl_Position=vec4(aPos.x/4.0,(-aPos.z+(aPos.y-1.10)*0.18)/4.0,(-aPos.z*0.06-aPos.y*0.10),1.0);vColor=aColor;vNormal=aNormal;}'),fs=shader(gl.FRAGMENT_SHADER,'precision mediump float;varying vec3 vColor;varying vec3 vNormal;void main(){vec3 n=normalize(vNormal);float light=0.48+0.52*abs(dot(n,normalize(vec3(-0.5,0.9,0.7))));gl_FragColor=vec4(vColor*light,1.0);}');program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));buffer=gl.createBuffer();gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL)}catch(e){failed=true;console.error('Azeroth WebGL:',e);if(canvas)canvas.remove();gl=null}}
+function init(board){if(gl||failed)return;try{canvas=document.createElement('canvas');canvas.id='webgl-figures';canvas.setAttribute('aria-hidden','true');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3';board.style.position='relative';board.append(canvas);gl=canvas.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:false});if(!gl)throw Error('WebGL non disponible');let vs=shader(gl.VERTEX_SHADER,'attribute vec3 aPos;attribute vec3 aNormal;attribute vec3 aColor;varying vec3 vColor;varying vec3 vNormal;void main(){gl_Position=vec4(aPos.x/4.0,-aPos.z/4.0,(-aPos.z*0.02-aPos.y*0.025),1.0);vColor=aColor;vNormal=aNormal;}'),fs=shader(gl.FRAGMENT_SHADER,'precision mediump float;varying vec3 vColor;varying vec3 vNormal;void main(){vec3 n=normalize(vNormal);float light=0.48+0.52*abs(dot(n,normalize(vec3(-0.5,0.9,0.7))));gl_FragColor=vec4(vColor*light,1.0);}');program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));buffer=gl.createBuffer();gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL)}catch(e){failed=true;console.error('Azeroth WebGL:',e);if(canvas)canvas.remove();gl=null}}
 function draw(board,pieces){init(board);if(!gl)return false;if(canvas.parentElement!==board)board.append(canvas);let dpr=Math.min(devicePixelRatio||1,2),size=Math.round(board.clientWidth*dpr);if(!size)return false;if(canvas.width!==size||canvas.height!==size){canvas.width=canvas.height=size;gl.viewport(0,0,size,size)}verts=[];for(let p of pieces)hero(p.side,p.type,p.c,p.r);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.DYNAMIC_DRAW);for(let [name,offset] of [['aPos',0],['aNormal',3],['aColor',6]]){let loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,3,gl.FLOAT,false,36,offset*4)}gl.drawArrays(gl.TRIANGLES,0,verts.length/9);return true}
 window.Azeroth3D={draw,rotate(){yaw+=Math.PI/4},available:true};})();
