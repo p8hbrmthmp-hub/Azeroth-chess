@@ -15,10 +15,28 @@ body.board-expanded .app>.status{position:fixed;z-index:30;left:0;right:0;top:0;
 body.board-expanded .boardframe{position:fixed;z-index:29;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,calc(100dvh - 145px));height:auto;max-width:none;margin:0;padding:3px;border-radius:8px}
 body.board-expanded .board{width:100%;aspect-ratio:1;border-radius:5px}
 @supports not (height:100dvh){body.board-expanded .boardframe{width:min(100vw,calc(100vh - 145px))}}
+
+/* Lecteur audio local : les musiques sont choisies par le joueur. */
+#musicToggle{grid-column:span 1}
+.music-panel{margin:10px 0;padding:14px;border:1px solid #b89a62;border-radius:16px;background:#101b2d;color:#f5f0e6}
+.music-panel[hidden]{display:none!important}
+.music-panel h2{margin:0 0 8px;font:700 19px Georgia,serif;color:#f2d390}
+.music-panel p{font-size:12px;color:#c8d2e1;line-height:1.5}
+.music-panel label{display:block;font-size:13px;margin:10px 0 5px}
+.music-panel input[type=file]{display:block;width:100%;max-width:100%;font-size:12px;color:#f5f0e6}
+.music-panel select{width:100%;padding:10px;background:#1c2b42;color:white;border:1px solid #8b744f;border-radius:8px}
+.music-panel .music-actions{display:flex;gap:8px;margin-top:10px}
+.music-panel .music-actions button{flex:1}
+.music-panel input[type=range]{width:100%;accent-color:#d8b778}
+#musicMessage{min-height:1.5em}
+body.board-expanded .music-panel{position:fixed;z-index:35;left:8px;right:8px;bottom:calc(60px + env(safe-area-inset-bottom));margin:0;max-height:calc(100dvh - 140px);overflow:auto;box-shadow:0 0 0 100vmax #0009}
+body.board-expanded .app>.buttons>#musicToggle{display:block;max-width:140px;width:35%}
+body.board-expanded .app>.buttons>#fullscreenToggle{width:60%}
 </style></head><body>
 <div id="intro" class="intro"><div class="eyebrow">LE DUEL DES ROYAUMES</div><div class="sigils"><span>♜</span> ⚔ <span>♜</span></div><h2>AZEROTH<br>CHESS</h2><p>Deux factions. Un échiquier. Une bataille de stratégie.</p><button class="btn gold" id="enter">ENTRER DANS L’ARÈNE</button><small>Application personnelle • Alliance contre Horde</small></div><div class="app"><header><div class="eyebrow">ÉDITION PERSONNELLE • V8 WebGL 3D</div><h1>AZEROTH CHESS</h1><div class="sub">Alliance ⚔ Horde · Le duel des royaumes</div></header>
 <div class="panel sides"><div class="side blue"><strong>✦ ALLIANCE</strong><span>Anduin · Jaina · Uther</span></div><div class="side red"><strong>✹ HORDE</strong><span>Thrall · Sylvanas · Garrosh</span></div></div>
-<div class="buttons"><button class="btn gold" id="new">Nouvelle partie</button><button class="btn" id="mode">2 joueurs</button><button class="btn" id="level">IA : novice</button><button class="btn" id="undo">↶ Annuler</button><button class="btn" id="flip">⇅ Retourner</button><button class="btn" id="rotate">⟳ Tourner 3D</button><button class="btn" id="help">ⓘ Guide</button><button class="btn gold" id="fullscreenToggle" type="button" aria-pressed="false">⛶ Plein écran</button></div>
+<div class="buttons"><button class="btn gold" id="new">Nouvelle partie</button><button class="btn" id="mode">2 joueurs</button><button class="btn" id="level">IA : novice</button><button class="btn" id="undo">↶ Annuler</button><button class="btn" id="flip">⇅ Retourner</button><button class="btn" id="rotate">⟳ Tourner 3D</button><button class="btn" id="help">ⓘ Guide</button><button class="btn" id="musicToggle" type="button" aria-expanded="false" aria-controls="musicPanel">♫ Musique</button><button class="btn gold" id="fullscreenToggle" type="button" aria-pressed="false">⛶ Plein écran</button></div>
+<section class="music-panel" id="musicPanel" hidden aria-label="Lecteur musical"><h2>♫ Musiques d’Azeroth Chess</h2><p>Choisis sur ton iPhone les fichiers audio que tu as le droit d’utiliser (MP3, M4A, WAV). Aucun morceau de World of Warcraft n’est fourni avec l’application.</p><label for="musicFiles">Ajouter plusieurs morceaux</label><input id="musicFiles" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg" multiple><label for="musicSelect">Thème à écouter</label><select id="musicSelect" disabled><option value="">Ajoute d’abord des morceaux</option></select><div class="music-actions"><button class="btn gold" id="musicPlay" type="button" disabled>▶ Écouter</button><button class="btn" id="musicStop" type="button" disabled>■ Arrêter</button></div><label for="musicVolume">Volume : <span id="musicVolumeValue">35 %</span></label><input id="musicVolume" type="range" min="0" max="100" value="35"><label><input id="musicLoop" type="checkbox" checked> Répéter le morceau</label><p id="musicMessage" role="status">La musique démarre uniquement après ton appui sur Écouter.</p><audio id="musicAudio" preload="none"></audio></section>
 <div class="panel status"><span id="status">Tour de l'Alliance</span><span class="pill" id="badge">PARTIE EN COURS</span></div><div class="boardframe"><div class="board" id="board"></div></div>
 <div class="meta"><div class="panel"><h3>CHRONIQUE</h3><div id="log" class="log">La bataille commence.</div></div><div class="panel"><h3>HÉROS</h3><div class="heroes">♔ Anduin / Thrall<br>♕ Jaina / Sylvanas<br>♖ Uther / Garrosh<br>♗ Tyrande / Vol'jin<br>♘ Arthas / Rexxar<br>♙ Lothar / Saurfang</div></div></div>
 <div class="notice">V8 · figurines 3D WebGL interactives, éclairage en temps réel · sans modèles officiels · progression sauvegardée sur cet appareil.</div></div>
@@ -28,5 +46,24 @@ body.board-expanded .board{width:100%;aspect-ratio:1;border-radius:5px}
 function refresh(){window.dispatchEvent(new Event('resize'));/* Le rendu 3D se recalcule aussi lors du prochain coup. */}
 button.addEventListener('click',()=>{const active=document.body.classList.toggle('board-expanded');button.textContent=active?'↙ Affichage normal':'⛶ Plein écran';button.setAttribute('aria-pressed',String(active));requestAnimationFrame(refresh);});
 window.addEventListener('orientationchange',()=>setTimeout(refresh,250));
+})();
+</script><script>
+/* Lecteur indépendant du moteur d'échecs : aucune modification de app.js ou figurines3d.js. */
+(()=>{'use strict';
+const $=id=>document.getElementById(id),toggle=$('musicToggle'),panel=$('musicPanel'),files=$('musicFiles'),select=$('musicSelect'),audio=$('musicAudio'),play=$('musicPlay'),stop=$('musicStop'),volume=$('musicVolume'),volumeValue=$('musicVolumeValue'),loop=$('musicLoop'),message=$('musicMessage');
+let tracks=[];
+function release(){audio.pause();audio.removeAttribute('src');audio.load();tracks.forEach(t=>URL.revokeObjectURL(t.url));tracks=[];}
+function choose(index){if(!tracks[index])return;audio.pause();audio.src=tracks[index].url;audio.load();play.textContent='▶ Écouter';message.textContent='Prêt : '+tracks[index].name;}
+toggle.addEventListener('click',()=>{panel.hidden=!panel.hidden;toggle.setAttribute('aria-expanded',String(!panel.hidden));});
+files.addEventListener('change',()=>{const picked=Array.from(files.files||[]).filter(f=>f.type.startsWith('audio/')||/\.(mp3|m4a|wav|aac|ogg)$/i.test(f.name));if(!picked.length){message.textContent='Choisis un ou plusieurs fichiers audio.';return;}release();tracks=picked.map(f=>({name:f.name,url:URL.createObjectURL(f)}));select.replaceChildren();tracks.forEach((t,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=t.name;select.append(option);});select.disabled=play.disabled=stop.disabled=false;select.value='0';choose(0);files.value='';});
+select.addEventListener('change',()=>{choose(Number(select.value));});
+play.addEventListener('click',async()=>{if(!tracks.length)return;if(!audio.paused){audio.pause();play.textContent='▶ Reprendre';return;}try{await audio.play();play.textContent='Ⅱ Pause';message.textContent='Lecture : '+tracks[Number(select.value)].name;}catch(e){message.textContent='Lecture impossible. Vérifie le format du fichier et appuie de nouveau sur Écouter.';}});
+stop.addEventListener('click',()=>{audio.pause();audio.currentTime=0;play.textContent='▶ Écouter';message.textContent='Musique arrêtée.';});
+volume.addEventListener('input',()=>{audio.volume=Number(volume.value)/100;volumeValue.textContent=volume.value+' %';});
+loop.addEventListener('change',()=>{audio.loop=loop.checked;});
+audio.addEventListener('ended',()=>{play.textContent='▶ Écouter';});
+audio.addEventListener('error',()=>{message.textContent='Ce fichier audio ne peut pas être lu sur cet iPhone.';play.textContent='▶ Écouter';});
+audio.volume=.35;audio.loop=true;
+window.addEventListener('pagehide',()=>{audio.pause();});
 })();
 </script><script src="figurines3d.js?v=14"></script><script src="app.js?v=8"></script><script>document.getElementById('enter').addEventListener('click',()=>document.getElementById('intro').classList.add('gone'));document.addEventListener('visibilitychange',()=>{if(!document.hidden)document.getElementById('intro').classList.add('gone')});</script><script>if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});</script></body></html>
